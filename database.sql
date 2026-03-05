@@ -1,0 +1,26 @@
+CREATE DATABASE IF NOT EXISTS clinica_db;
+USE clinica_db;
+
+CREATE TABLE IF NOT EXISTS medicos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    especialidad VARCHAR(100) NOT NULL,
+    licencia VARCHAR(50) NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS pacientes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    documento VARCHAR(50) NOT NULL UNIQUE,
+    correo VARCHAR(100) NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS citas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    medico_id INT NOT NULL,
+    paciente_id INT NOT NULL,
+    fecha_hora DATETIME NOT NULL,
+    estado ENUM('ACTIVA', 'CANCELADA', 'COMPLETADA') DEFAULT 'ACTIVA',
+    FOREIGN KEY (medico_id) REFERENCES medicos(id),
+    FOREIGN KEY (paciente_id) REFERENCES pacientes(id)
+);

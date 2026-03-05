@@ -1,0 +1,1 @@
+{"version":3,"file":"ConsultarDisponibilidadUseCase.d.ts","sourceRoot":"","sources":["../../../src/application/use-cases/ConsultarDisponibilidadUseCase.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,eAAe,EAAE,MAAM,2CAA2C,CAAC;AAE5E,qBAAa,8BAA8B;IAC3B,OAAO,CAAC,QAAQ,CAAC,cAAc;gBAAd,cAAc,EAAE,eAAe;IAEtD,OAAO,CAAC,QAAQ,EAAE,MAAM,EAAE,KAAK,EAAE,IAAI,GAAG,OAAO,CAAC,MAAM,EAAE,CAAC;CAuClE"}
