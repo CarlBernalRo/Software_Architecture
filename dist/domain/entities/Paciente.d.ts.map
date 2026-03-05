@@ -1,1 +1,0 @@
-{"version":3,"file":"Paciente.d.ts","sourceRoot":"","sources":["../../../src/domain/entities/Paciente.ts"],"names":[],"mappings":"AAAA,qBAAa,QAAQ;aAEG,EAAE,EAAE,MAAM;IACnB,MAAM,EAAE,MAAM;IACd,SAAS,EAAE,MAAM;IACjB,MAAM,EAAE,MAAM;gBAHL,EAAE,EAAE,MAAM,EACnB,MAAM,EAAE,MAAM,EACd,SAAS,EAAE,MAAM,EACjB,MAAM,EAAE,MAAM;CAE5B"}
