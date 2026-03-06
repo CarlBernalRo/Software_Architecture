@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Modal } from '../components/Modal';
 import { useCitas } from '../../application/hooks/useCitas';
 import { useMedicos } from '../../application/hooks/useMedicos';
 import { usePacientes } from '../../application/hooks/usePacientes';
@@ -9,10 +10,11 @@ export const Citas: React.FC = () => {
     const { pacientes, fetchPacientes } = usePacientes();
 
     const [showForm, setShowForm] = useState(false);
+    const [modalConfig, setModalConfig] = useState({ isOpen: false, title: '', message: '', type: 'info' as 'info' | 'error' | 'success' });
     const [formData, setFormData] = useState({
-        paciente_id: '',
-        medico_id: '',
-        fecha_hora: ''
+        pacienteId: '',
+        medicoId: '',
+        fechaHora: ''
     });
 
     useEffect(() => {
@@ -25,136 +27,177 @@ export const Citas: React.FC = () => {
         e.preventDefault();
         try {
             await agendarCita({
-                paciente_id: parseInt(formData.paciente_id),
-                medico_id: parseInt(formData.medico_id),
-                fecha_hora: formData.fecha_hora // ensure ISO format? using simple local-datetime input
+                pacienteId: parseInt(formData.pacienteId),
+                medicoId: parseInt(formData.medicoId),
+                fechaHora: formData.fechaHora
             });
             setShowForm(false);
-            setFormData({ paciente_id: '', medico_id: '', fecha_hora: '' });
-        } catch (err) {
-            alert('Error agendando cita');
+            setFormData({ pacienteId: '', medicoId: '', fechaHora: '' });
+            setModalConfig({ isOpen: true, title: 'Éxito', message: 'Cita agendada correctamente', type: 'success' });
+        } catch (err: any) {
+            setModalConfig({ isOpen: true, title: 'Error', message: err.message, type: 'error' });
         }
     };
 
     const formatearFecha = (fechaISO: string) => {
         try {
-            return new Date(fechaISO).toLocaleString();
+            const date = new Date(fechaISO);
+            return date.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }) + ' - ' +
+                date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
         } catch {
             return fechaISO;
         }
     };
 
-    const renderBadge = (estado: string) => {
-        switch (estado) {
-            case 'PROGRAMADA': return <span className="badge badge-success">{estado}</span>;
-            case 'CANCELADA': return <span className="badge badge-danger">{estado}</span>;
-            case 'COMPLETADA': return <span className="badge badge-warning">{estado}</span>;
-            default: return <span className="badge">{estado}</span>;
-        }
-    };
-
     return (
-        <div>
-            <div className="flex-between">
-                <h2>Gestión de Citas</h2>
-                <button className="btn btn-primary" onClick={() => setShowForm(!showForm)}>
-                    {showForm ? 'Cancelar' : 'Agendar Cita'}
+        <div className="flex-1 pb-24">
+            {/* Header Area */}
+            <div className="flex items-center bg-white dark:bg-slate-900 p-4 border-b border-slate-200 dark:border-slate-800 justify-between">
+                <h2 className="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-tight">
+                    {showForm ? 'Agendar Cita' : 'Gestión de Citas'}
+                </h2>
+                <button
+                    className={`btn px-4 py-1.5 rounded-xl font-bold text-sm ${showForm ? 'bg-slate-100 dark:bg-slate-800 text-slate-600' : 'bg-primary text-white'}`}
+                    onClick={() => setShowForm(!showForm)}
+                >
+                    {showForm ? 'Volver' : 'Nueva Cita'}
                 </button>
             </div>
 
-            {showForm && (
-                <div className="glass-card" style={{ marginBottom: '2rem' }}>
-                    <h3>Agendar Nueva Cita</h3>
-                    <form onSubmit={handleSubmit} style={{ marginTop: '1rem' }}>
-                        <div className="grid-2">
-                            <div className="form-group">
-                                <label>Paciente</label>
+            {showForm ? (
+                /* Agendar Cita View */
+                <div className="max-w-xl mx-auto px-4 py-6 space-y-8 animate-in fade-in slide-in-from-bottom-4">
+                    <div className="space-y-6">
+                        {/* 1. Patient Selection */}
+                        <div className="space-y-3">
+                            <h3 className="text-slate-900 dark:text-slate-100 text-base font-semibold text-left">1. Información del Paciente</h3>
+                            <div className="relative">
                                 <select
-                                    required
-                                    value={formData.paciente_id}
-                                    onChange={e => setFormData({ ...formData, paciente_id: e.target.value })}
+                                    className="w-full h-12 pl-4 pr-10 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-sm focus:ring-2 focus:ring-primary outline-none appearance-none"
+                                    value={formData.pacienteId}
+                                    onChange={e => setFormData({ ...formData, pacienteId: e.target.value })}
                                 >
-                                    <option value="">Seleccione Paciente</option>
-                                    {pacientes.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
+                                    <option value="">Seleccionar Paciente</option>
+                                    {pacientes.map(p => <option key={p.id} value={p.id}>{p.nombre} (ID: {p.documento})</option>)}
                                 </select>
                             </div>
+                        </div>
 
-                            <div className="form-group">
-                                <label>Médico</label>
+                        {/* 2. Doctor Selection */}
+                        <div className="space-y-3 p-4 bg-primary/5 rounded-2xl border border-primary/10">
+                            <h3 className="text-slate-900 dark:text-slate-100 text-base font-semibold text-left">2. Especialista</h3>
+                            <div className="relative">
                                 <select
-                                    required
-                                    value={formData.medico_id}
-                                    onChange={e => setFormData({ ...formData, medico_id: e.target.value })}
+                                    className="w-full h-12 pl-4 pr-10 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-sm focus:ring-2 focus:ring-primary outline-none appearance-none"
+                                    value={formData.medicoId}
+                                    onChange={e => setFormData({ ...formData, medicoId: e.target.value })}
                                 >
-                                    <option value="">Seleccione Médico</option>
-                                    {medicos.map(m => <option key={m.id} value={m.id}>{m.nombre} ({m.especialidad})</option>)}
+                                    <option value="">Seleccionar Médico</option>
+                                    {medicos.map(m => (
+                                        <option key={m.id} value={m.id}>
+                                            {m.nombre} - {m.especialidad}
+                                        </option>
+                                    ))}
                                 </select>
                             </div>
+                        </div>
 
-                            <div className="form-group">
-                                <label>Fecha y Hora</label>
+                        {/* 3. Date & Time Selection */}
+                        <div className="space-y-3">
+                            <h3 className="text-slate-900 dark:text-slate-100 text-base font-semibold text-left">3. Fecha y Hora</h3>
+                            <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
                                 <input
                                     type="datetime-local"
-                                    required
-                                    value={formData.fecha_hora}
-                                    onChange={e => setFormData({ ...formData, fecha_hora: e.target.value })}
+                                    className="w-full h-12 px-4 rounded-xl border-none bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary"
+                                    value={formData.fechaHora}
+                                    onChange={e => setFormData({ ...formData, fechaHora: e.target.value })}
                                 />
                             </div>
                         </div>
 
-                        <button type="submit" className="btn btn-primary" disabled={loading}>
-                            Guardar Cita
-                        </button>
-                    </form>
+                        {/* Submit Button */}
+                        <div className="pt-4">
+                            <button
+                                onClick={handleSubmit}
+                                disabled={loading || !formData.pacienteId || !formData.medicoId || !formData.fechaHora}
+                                className="w-full bg-primary text-white font-bold py-4 rounded-xl shadow-lg shadow-primary/25 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                            >
+                                <span className="material-symbols-outlined">event_available</span>
+                                Agendar Registro
+                            </button>
+                        </div>
+                    </div>
                 </div>
+            ) : (
+                /* Gestión de Citas (List View) */
+                <main className="px-4 py-6 space-y-6">
+                    <div className="flex items-center justify-between mb-2">
+                        <h3 className="text-slate-900 dark:text-slate-100 text-md font-bold leading-tight tracking-tight">Próximas Citas</h3>
+                        <div className="flex gap-2">
+                            <button className="text-xs font-bold px-3 py-1 bg-primary text-white rounded-full">Activas</button>
+                            <button className="text-xs font-bold px-3 py-1 text-slate-400 bg-white dark:bg-slate-800 rounded-full border border-slate-100 dark:border-slate-700">Pasadas</button>
+                        </div>
+                    </div>
+
+                    {loading ? (
+                        <div className="py-20 text-center text-slate-500">Actualizando agenda...</div>
+                    ) : citas.length === 0 ? (
+                        <div className="py-20 text-center text-slate-400 bg-white dark:bg-slate-800 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
+                            No hay citas hoy. Agrega una nueva.
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            {citas.map(cita => (
+                                <div key={cita.id} className="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 space-y-4 text-left">
+                                    <div className="flex items-start gap-4">
+                                        <div className="size-14 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0 border-2 border-primary/5">
+                                            <span className="material-symbols-outlined text-3xl">person</span>
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className="text-slate-900 dark:text-slate-100 text-base font-semibold mb-0">{cita.paciente?.nombre || 'Paciente #' + cita.pacienteId}</p>
+                                            <p className="text-primary text-sm font-medium mb-1">{cita.medico?.nombre || 'Médico #' + cita.medicoId}</p>
+                                            <div className="flex items-center gap-1 text-slate-500 dark:text-slate-400">
+                                                <span className="material-symbols-outlined text-xs">calendar_today</span>
+                                                <p className="text-xs">{formatearFecha(cita.fechaHora)}</p>
+                                            </div>
+                                        </div>
+                                        <div className={`flex items-center px-2 py-1 rounded ${cita.estado === 'CANCELADA' ? 'bg-red-100 dark:bg-red-900/30' : 'bg-green-100 dark:bg-green-900/30'}`}>
+                                            <span className={`text-[10px] font-bold uppercase tracking-wider ${cita.estado === 'CANCELADA' ? 'text-red-700 dark:text-red-400' : 'text-green-700 dark:text-green-400'}`}>
+                                                {cita.estado}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {cita.estado !== 'CANCELADA' && (
+                                        <div className="flex gap-3 pt-2">
+                                            <button
+                                                className="flex-1 flex items-center justify-center rounded-lg h-10 px-4 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-sm font-bold border border-slate-100 dark:border-slate-700 active:scale-95 transition-transform"
+                                                onClick={() => setModalConfig({ isOpen: true, title: 'Info', message: 'Reprogramación coming soon...', type: 'info' })}
+                                            >
+                                                Reprogramar
+                                            </button>
+                                            <button
+                                                className="flex-1 flex items-center justify-center rounded-lg h-10 px-4 bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 text-sm font-bold border border-red-100 dark:border-red-900/30 active:scale-95 transition-transform"
+                                                onClick={() => cancelarCita(cita.id!)}
+                                            >
+                                                Cancelar
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </main>
             )}
 
-            <div className="glass-card">
-                {loading ? (
-                    <div className="loading">Cargando citas...</div>
-                ) : (
-                    <div className="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Paciente (ID)</th>
-                                    <th>Médico (ID)</th>
-                                    <th>Fecha/Hora</th>
-                                    <th>Estado</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {citas.length === 0 ? (
-                                    <tr><td colSpan={6} style={{ textAlign: 'center' }}>No hay citas registradas.</td></tr>
-                                ) : (
-                                    citas.map(cita => (
-                                        <tr key={cita.id}>
-                                            <td>{cita.id}</td>
-                                            <td>{cita.paciente?.nombre || cita.paciente_id}</td>
-                                            <td>{cita.medico?.nombre || cita.medico_id}</td>
-                                            <td>{formatearFecha(cita.fecha_hora)}</td>
-                                            <td>{renderBadge(cita.estado)}</td>
-                                            <td>
-                                                {cita.estado !== 'CANCELADA' && (
-                                                    <button
-                                                        className="btn btn-danger"
-                                                        style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
-                                                        onClick={() => cancelarCita(cita.id!)}
-                                                    >
-                                                        Cancelar
-                                                    </button>
-                                                )}
-                                            </td>
-                                        </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
-            </div>
+            <Modal
+                isOpen={modalConfig.isOpen}
+                onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
+                title={modalConfig.title}
+                message={modalConfig.message}
+                type={modalConfig.type}
+            />
         </div>
     );
 };

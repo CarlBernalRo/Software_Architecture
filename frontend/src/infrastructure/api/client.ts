@@ -14,7 +14,7 @@ export const httpClient = async <T>(endpoint: string, options: RequestInit = {})
     const data = await response.json();
 
     if (!response.ok) {
-        throw new Error(data.message || "Error en la petición a la API");
+        throw new Error(data.error || data.message || "Error en la petición a la API");
     }
 
     return data as T;

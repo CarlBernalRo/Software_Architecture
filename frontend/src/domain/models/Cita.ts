@@ -3,9 +3,9 @@ import type { Paciente } from "./Paciente";
 
 export interface Cita {
     id?: number;
-    paciente_id: number;
-    medico_id: number;
-    fecha_hora: string; // ISO string 
+    pacienteId: number;
+    medicoId: number;
+    fechaHora: string; // ISO string 
     estado: "PROGRAMADA" | "CANCELADA" | "COMPLETADA";
     created_at?: Date;
     updated_at?: Date;
