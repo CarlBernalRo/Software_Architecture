@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { UserPlus, Stethoscope } from 'lucide-react';
 import { Modal } from '../components/Modal';
 import { useMedicos } from '../../application/hooks/useMedicos';
 
@@ -29,7 +30,7 @@ export const Medicos: React.FC = () => {
             {/* Header / Hero Section */}
             <div className="mb-8 flex flex-col items-center text-center">
                 <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                    <span className="material-symbols-outlined text-5xl">person_add</span>
+                    <UserPlus className="size-12" />
                 </div>
                 <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Nuevo Especialista</h2>
                 <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
@@ -121,7 +122,7 @@ export const Medicos: React.FC = () => {
                         medicos.map(medico => (
                             <div key={medico.id} className="flex items-center gap-4 p-4 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm">
                                 <div className="size-12 rounded-full bg-primary/5 flex items-center justify-center text-primary shrink-0">
-                                    <span className="material-symbols-outlined text-2xl">medical_services</span>
+                                    <Stethoscope className="size-6" />
                                 </div>
                                 <div className="flex-1 text-left">
                                     <h4 className="text-slate-900 dark:text-slate-100 font-semibold text-base mb-0">{medico.nombre}</h4>

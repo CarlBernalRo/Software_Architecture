@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { CalendarCheck, User, Calendar, Clock } from 'lucide-react';
 import { Modal } from '../components/Modal';
 import { useCitas } from '../../application/hooks/useCitas';
 import { useMedicos } from '../../application/hooks/useMedicos';
@@ -10,6 +11,7 @@ export const Citas: React.FC = () => {
     const { pacientes, fetchPacientes } = usePacientes();
 
     const [showForm, setShowForm] = useState(false);
+    const [statusFilter, setStatusFilter] = useState<'activa' | 'pasada'>('activa');
     const [modalConfig, setModalConfig] = useState({ isOpen: false, title: '', message: '', type: 'info' as 'info' | 'error' | 'success' });
     const [formData, setFormData] = useState({
         pacienteId: '',
@@ -48,6 +50,21 @@ export const Citas: React.FC = () => {
             return fechaISO;
         }
     };
+
+    const citasFiltradas = citas.filter(cita => {
+        const fechaCita = new Date(cita.fechaHora);
+        const ahora = new Date();
+        
+        if (statusFilter === 'activa') {
+            return (fechaCita >= ahora || (fechaCita.toDateString() === ahora.toDateString())) && cita.estado !== 'CANCELADA';
+        } else {
+            return fechaCita < ahora || cita.estado === 'CANCELADA';
+        }
+    }).sort((a, b) => {
+        const dateA = new Date(a.fechaHora).getTime();
+        const dateB = new Date(b.fechaHora).getTime();
+        return statusFilter === 'activa' ? dateA - dateB : dateB - dateA;
+    });
 
     return (
         <div className="flex-1 pb-24">
@@ -122,7 +139,7 @@ export const Citas: React.FC = () => {
                                 disabled={loading || !formData.pacienteId || !formData.medicoId || !formData.fechaHora}
                                 className="w-full bg-primary text-white font-bold py-4 rounded-xl shadow-lg shadow-primary/25 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                             >
-                                <span className="material-symbols-outlined">event_available</span>
+                                <CalendarCheck className="size-5" />
                                 Agendar Registro
                             </button>
                         </div>
@@ -132,32 +149,45 @@ export const Citas: React.FC = () => {
                 /* Gestión de Citas (List View) */
                 <main className="px-4 py-6 space-y-6">
                     <div className="flex items-center justify-between mb-2">
-                        <h3 className="text-slate-900 dark:text-slate-100 text-md font-bold leading-tight tracking-tight">Próximas Citas</h3>
+                        <h3 className="text-slate-900 dark:text-slate-100 text-md font-bold leading-tight tracking-tight">
+                            {statusFilter === 'activa' ? 'Próximas Citas' : 'Historial de Citas'}
+                        </h3>
                         <div className="flex gap-2">
-                            <button className="text-xs font-bold px-3 py-1 bg-primary text-white rounded-full">Activas</button>
-                            <button className="text-xs font-bold px-3 py-1 text-slate-400 bg-white dark:bg-slate-800 rounded-full border border-slate-100 dark:border-slate-700">Pasadas</button>
+                            <button 
+                                onClick={() => setStatusFilter('activa')}
+                                className={`text-xs font-bold px-4 py-1.5 rounded-full transition-all ${statusFilter === 'activa' ? 'bg-primary text-white shadow-md shadow-primary/20' : 'text-slate-400 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700'}`}
+                            >
+                                Activas
+                            </button>
+                            <button 
+                                onClick={() => setStatusFilter('pasada')}
+                                className={`text-xs font-bold px-4 py-1.5 rounded-full transition-all ${statusFilter === 'pasada' ? 'bg-primary text-white shadow-md shadow-primary/20' : 'text-slate-400 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700'}`}
+                            >
+                                Pasadas
+                            </button>
                         </div>
                     </div>
 
                     {loading ? (
                         <div className="py-20 text-center text-slate-500">Actualizando agenda...</div>
-                    ) : citas.length === 0 ? (
+                    ) : citasFiltradas.length === 0 ? (
                         <div className="py-20 text-center text-slate-400 bg-white dark:bg-slate-800 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
-                            No hay citas hoy. Agrega una nueva.
+                            <Clock className="size-10 mx-auto mb-3 opacity-20" />
+                            <p>No se encontraron citas {statusFilter === 'activa' ? 'activas' : 'pasadas'}.</p>
                         </div>
                     ) : (
                         <div className="space-y-4">
-                            {citas.map(cita => (
+                            {citasFiltradas.map(cita => (
                                 <div key={cita.id} className="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 space-y-4 text-left">
                                     <div className="flex items-start gap-4">
                                         <div className="size-14 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0 border-2 border-primary/5">
-                                            <span className="material-symbols-outlined text-3xl">person</span>
+                                            <User className="size-8" />
                                         </div>
                                         <div className="flex-1">
                                             <p className="text-slate-900 dark:text-slate-100 text-base font-semibold mb-0">{cita.paciente?.nombre || 'Paciente #' + cita.pacienteId}</p>
                                             <p className="text-primary text-sm font-medium mb-1">{cita.medico?.nombre || 'Médico #' + cita.medicoId}</p>
                                             <div className="flex items-center gap-1 text-slate-500 dark:text-slate-400">
-                                                <span className="material-symbols-outlined text-xs">calendar_today</span>
+                                                <Calendar className="size-3" />
                                                 <p className="text-xs">{formatearFecha(cita.fechaHora)}</p>
                                             </div>
                                         </div>
@@ -168,7 +198,7 @@ export const Citas: React.FC = () => {
                                         </div>
                                     </div>
 
-                                    {cita.estado !== 'CANCELADA' && (
+                                    {statusFilter === 'activa' && cita.estado !== 'CANCELADA' && (
                                         <div className="flex gap-3 pt-2">
                                             <button
                                                 className="flex-1 flex items-center justify-center rounded-lg h-10 px-4 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-sm font-bold border border-slate-100 dark:border-slate-700 active:scale-95 transition-transform"

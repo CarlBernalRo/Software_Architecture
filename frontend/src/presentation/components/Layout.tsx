@@ -1,14 +1,15 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { LayoutDashboard, Calendar, Users, Stethoscope, Bell } from 'lucide-react';
 
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const location = useLocation();
 
     const navItems = [
-        { name: 'Panel', path: '/', icon: 'grid_view' },
-        { name: 'Citas', path: '/citas', icon: 'calendar_today' },
-        { name: 'Pacientes', path: '/pacientes', icon: 'groups' },
-        { name: 'Médicos', path: '/medicos', icon: 'stethoscope' },
+        { name: 'Panel', path: '/', icon: LayoutDashboard },
+        { name: 'Citas', path: '/citas', icon: Calendar },
+        { name: 'Pacientes', path: '/pacientes', icon: Users },
+        { name: 'Médicos', path: '/medicos', icon: Stethoscope },
     ];
 
     return (
@@ -27,7 +28,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                 </h1>
                 <div className="flex w-10 items-center justify-end">
                     <button className="flex items-center justify-center rounded-full h-10 w-10 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                        <span className="material-symbols-outlined">notifications</span>
+                        <Bell className="size-5" />
                     </button>
                 </div>
             </header>
@@ -41,13 +42,14 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             <nav className="fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg border-t border-slate-200 dark:border-slate-800 px-6 pb-6 pt-3 flex justify-between items-center z-20">
                 {navItems.map((item) => {
                     const isActive = location.pathname === item.path;
+                    const Icon = item.icon;
                     return (
                         <Link
                             key={item.path}
                             to={item.path}
                             className={`flex flex-col items-center gap-1 transition-colors ${isActive ? 'text-primary' : 'text-slate-400 dark:text-slate-500'}`}
                         >
-                            <span className="material-symbols-outlined">{item.icon}</span>
+                            <Icon className={`size-6 ${isActive ? 'stroke-[2.5px]' : 'stroke-2'}`} />
                             <span className={`text-[10px] ${isActive ? 'font-bold' : 'font-medium'}`}>{item.name}</span>
                         </Link>
                     );
