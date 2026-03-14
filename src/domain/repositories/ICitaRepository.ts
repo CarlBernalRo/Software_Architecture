@@ -2,6 +2,7 @@ import { Cita } from "../entities/Cita";
 
 export interface ICitaRepository {
     findById(id: number): Promise<Cita | null>;
+    findAll(): Promise<Cita[]>;
     save(cita: Omit<Cita, 'id'>): Promise<Cita>;
     update(cita: Cita): Promise<void>;
 

@@ -7,6 +7,7 @@ import { AgendarCitaUseCase } from "../../application/use-cases/AgendarCitaUseCa
 import { CancelarCitaUseCase } from "../../application/use-cases/CancelarCitaUseCase";
 import { ReprogramarCitaUseCase } from "../../application/use-cases/ReprogramarCitaUseCase";
 import { ConsultarDisponibilidadUseCase } from "../../application/use-cases/ConsultarDisponibilidadUseCase";
+import { CompletarCitaUseCase } from "../../application/use-cases/CompletarCitaUseCase";
 
 const router = Router();
 
@@ -19,12 +20,15 @@ const agendarUC = new AgendarCitaUseCase(citaRepo, medicoRepo, pacienteRepo);
 const cancelarUC = new CancelarCitaUseCase(citaRepo);
 const reprogramarUC = new ReprogramarCitaUseCase(citaRepo);
 const consultarUC = new ConsultarDisponibilidadUseCase(citaRepo);
+const completarUC = new CompletarCitaUseCase(citaRepo);
 
-const controller = new CitaController(citaRepo, agendarUC, cancelarUC, reprogramarUC, consultarUC);
+const controller = new CitaController(citaRepo, agendarUC, cancelarUC, reprogramarUC, consultarUC, completarUC);
 
 // Rutas
+router.get("/", controller.listar.bind(controller));
 router.post("/", controller.agendar.bind(controller));
 router.patch("/:id/cancelar", controller.cancelar.bind(controller));
+router.patch("/:id/completar", controller.completar.bind(controller));
 router.patch("/:id/reprogramar", controller.reprogramar.bind(controller));
 router.get("/disponibilidad", controller.consultarDisponibilidad.bind(controller));
 

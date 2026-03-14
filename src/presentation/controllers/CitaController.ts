@@ -3,6 +3,7 @@ import { AgendarCitaUseCase } from "../../application/use-cases/AgendarCitaUseCa
 import { CancelarCitaUseCase } from "../../application/use-cases/CancelarCitaUseCase";
 import { ReprogramarCitaUseCase } from "../../application/use-cases/ReprogramarCitaUseCase";
 import { ConsultarDisponibilidadUseCase } from "../../application/use-cases/ConsultarDisponibilidadUseCase";
+import { CompletarCitaUseCase } from "../../application/use-cases/CompletarCitaUseCase";
 import { ICitaRepository } from "../../domain/repositories/ICitaRepository";
 
 export class CitaController {
@@ -11,7 +12,8 @@ export class CitaController {
         private agendarUseCase: AgendarCitaUseCase,
         private cancelarUseCase: CancelarCitaUseCase,
         private reprogramarUseCase: ReprogramarCitaUseCase,
-        private consultarUseCase: ConsultarDisponibilidadUseCase
+        private consultarUseCase: ConsultarDisponibilidadUseCase,
+        private completarUseCase: CompletarCitaUseCase
     ) { }
 
     async agendar(req: Request, res: Response): Promise<void> {
@@ -29,6 +31,17 @@ export class CitaController {
         }
     }
 
+    async listar(req: Request, res: Response): Promise<void> {
+        try {
+            // Assuming this.citaRepository.findAll() or similar exists. Let's check ICitaRepository if needed or just use findAll.
+            // Wait, we can just call it directly. The interface is ICitaRepository.
+            const citas = await this.citaRepository.findAll();
+            res.status(200).json(citas);
+        } catch (error: any) {
+            res.status(500).json({ error: "Error al obtener las citas" });
+        }
+    }
+
     async cancelar(req: Request, res: Response): Promise<void> {
         try {
             const { id } = req.params;
@@ -39,18 +52,28 @@ export class CitaController {
         }
     }
 
+    async completar(req: Request, res: Response): Promise<void> {
+        try {
+            const { id } = req.params;
+            await this.completarUseCase.execute(Number(id));
+            res.status(200).json({ message: "Cita completada correctamente." });
+        } catch (error: any) {
+            res.status(400).json({ error: error.message });
+        }
+    }
+
     async reprogramar(req: Request, res: Response): Promise<void> {
         try {
             const { id } = req.params;
-            const { nuevaFechaHora } = req.body;
+            const { fecha_hora, medico_id } = req.body;
 
-            if (!nuevaFechaHora) {
-                res.status(400).json({ error: "nuevaFechaHora es obligatorio." });
+            if (!fecha_hora || !medico_id) {
+                res.status(400).json({ error: "fecha_hora y medico_id son obligatorios." });
                 return;
             }
 
-            await this.reprogramarUseCase.execute(Number(id), new Date(nuevaFechaHora));
-            res.status(200).json({ message: "Cita reprogramada correctamente." });
+            const citaActualizada = await this.reprogramarUseCase.execute(Number(id), new Date(fecha_hora), Number(medico_id));
+            res.status(200).json(citaActualizada);
         } catch (error: any) {
             res.status(400).json({ error: error.message });
         }
@@ -64,8 +87,8 @@ export class CitaController {
                 return;
             }
 
-            const huecos = await this.consultarUseCase.execute(Number(medicoId), new Date(fecha as string));
-            res.status(200).json({ huecosDisponibles: huecos });
+            const huecos = await this.consultarUseCase.execute(Number(medicoId), fecha as string);
+            res.status(200).json(huecos);
         } catch (error: any) {
             res.status(400).json({ error: error.message });
         }

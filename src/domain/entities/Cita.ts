@@ -8,7 +8,7 @@ export class Cita {
 
     constructor(
         public readonly id: number,
-        public readonly medicoId: number,
+        public medicoId: number,
         public readonly pacienteId: number,
         public fechaHora: Date,
         public estado: EstadoCita = 'ACTIVA',
@@ -23,14 +23,20 @@ export class Cita {
         this.estado = 'CANCELADA';
     }
 
-    reprogramar(nuevaFechaHora: Date): void {
+    completar(): void {
         if (this.estado !== 'ACTIVA') {
-            throw new Error("Solo se puede reprogramar una cita activa.");
+            throw new Error("Solo se puede completar una cita activa.");
         }
+        this.estado = 'COMPLETADA';
+    }
+
+    reprogramar(nuevaFechaHora: Date, nuevoMedicoId: number): void {
         const ahora = new Date();
         if (nuevaFechaHora < ahora) {
             throw new Error("No se puede agendar una cita en el pasado.");
         }
         this.fechaHora = nuevaFechaHora;
+        this.medicoId = nuevoMedicoId;
+        this.estado = 'ACTIVA';
     }
 }

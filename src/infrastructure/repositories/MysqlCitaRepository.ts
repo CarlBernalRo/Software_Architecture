@@ -5,10 +5,52 @@ import { pool } from "../database/mysql";
 
 export class MysqlCitaRepository implements ICitaRepository {
     async findById(id: number): Promise<Cita | null> {
-        const [rows] = await pool.query<RowDataPacket[]>("SELECT * FROM citas WHERE id = ?", [id]);
+        const query = `
+            SELECT 
+                c.*, 
+                m.nombre as medico_nombre, m.especialidad as medico_especialidad, m.licencia as medico_licencia,
+                p.nombre as paciente_nombre, p.documento as paciente_documento, p.correo as paciente_correo
+            FROM citas c
+            LEFT JOIN medicos m ON c.medico_id = m.id
+            LEFT JOIN pacientes p ON c.paciente_id = p.id
+            WHERE c.id = ?
+        `;
+        const [rows] = await pool.query<RowDataPacket[]>(query, [id]);
         if (rows.length === 0) return null;
         const row = rows[0];
-        return new Cita(row.id, row.medico_id, row.paciente_id, new Date(row.fecha_hora), row.estado as EstadoCita);
+        const cita = new Cita(row.id, row.medico_id, row.paciente_id, new Date(row.fecha_hora), row.estado as EstadoCita);
+        if (row.medico_nombre) {
+            cita.medico = { id: row.medico_id, nombre: row.medico_nombre, especialidad: row.medico_especialidad, licencia: row.medico_licencia };
+        }
+        if (row.paciente_nombre) {
+            cita.paciente = { id: row.paciente_id, nombre: row.paciente_nombre, documento: row.paciente_documento, correo: row.paciente_correo };
+        }
+        return cita;
+    }
+
+    async findAll(): Promise<Cita[]> {
+        const query = `
+            SELECT 
+                c.*, 
+                m.nombre as medico_nombre, m.especialidad as medico_especialidad, m.licencia as medico_licencia,
+                p.nombre as paciente_nombre, p.documento as paciente_documento, p.correo as paciente_correo
+            FROM citas c
+            LEFT JOIN medicos m ON c.medico_id = m.id
+            LEFT JOIN pacientes p ON c.paciente_id = p.id
+            ORDER BY c.fecha_hora DESC
+        `;
+        const [rows] = await pool.query<RowDataPacket[]>(query);
+        
+        return rows.map(row => {
+            const cita = new Cita(row.id, row.medico_id, row.paciente_id, new Date(row.fecha_hora), row.estado as EstadoCita);
+            if (row.medico_nombre) {
+                cita.medico = { id: row.medico_id, nombre: row.medico_nombre, especialidad: row.medico_especialidad, licencia: row.medico_licencia };
+            }
+            if (row.paciente_nombre) {
+                cita.paciente = { id: row.paciente_id, nombre: row.paciente_nombre, documento: row.paciente_documento, correo: row.paciente_correo };
+            }
+            return cita;
+        });
     }
 
     async save(cita: Omit<Cita, "id">): Promise<Cita> {
@@ -21,8 +63,8 @@ export class MysqlCitaRepository implements ICitaRepository {
 
     async update(cita: Cita): Promise<void> {
         await pool.query(
-            "UPDATE citas SET fecha_hora = ?, estado = ? WHERE id = ?",
-            [cita.fechaHora, cita.estado, cita.id]
+            "UPDATE citas SET fecha_hora = ?, estado = ?, medico_id = ? WHERE id = ?",
+            [cita.fechaHora, cita.estado, cita.medicoId, cita.id]
         );
     }
 
