@@ -39,5 +39,3 @@ Para una inmersión más técnica sobre el funcionamiento de cada entorno, consu
 - [Guía para Desarrolladores (Setup y Ejecución)](./developer-guide.md) - Instrucciones de instalación, conexión a BD y explicación de librerías.
 - [Arquitectura del Backend](./backend.md)
 - [Arquitectura del Frontend](./frontend.md)
-- [ACA - Actividad de Construcción Aplicada](./ACA.md) - Documentación académica del proyecto (Normas APA).
-- [Script de Base de Datos](../database.sql) - Contiene el DDL de las tablas SQL.
