@@ -13,7 +13,7 @@ En consonancia con el backend, el proyecto implementa la misma jerarquía de cap
 - `/infrastructure`: Adaptadores HTTP y repositorios de datos frontales. Por lo general, engloban las llamadas `fetch()` y parseo de las respuestas provenientes desde la API REST. Se ajustan a las interfaces del dominio para garantizar consistencia.
 - `/presentation`:
   - Enrutamiento provisto por React Router DOM (Manejo de rutas amigables en cliente).
-  - Los **Componentes UI de React**. Solo llaman a los métodos de la capa `application` y reaccionan cediendo visualizaciones de estados a los usuarios (Carga, Errores, Vista exitosa de un panel).
+  - Los **Componentes UI de React** (Carpeta `components` como `Layout` y `Modal`). Solo llaman a los métodos de la capa `application` y reaccionan cediendo visualizaciones de estados a los usuarios (Carga, Errores, Vista exitosa de un panel).
 - `/assets`: Recursos gráficos (imágenes, iconos vectoriales y otros insumos estáticos).
 
 ## 2. Decisiones Tecnológicas

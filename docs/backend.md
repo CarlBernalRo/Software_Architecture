@@ -10,7 +10,7 @@ El backend sigue un estricto patrón de arquitectura limpia dividida en cuatro c
   - Los modelos TypeScript (ej. `Paciente`, `Medico`, `Cita`).
   - Las interfaces de los repositorios que indican *qué* operaciones se pueden hacer sobre ellos sin decir *cómo*.
 
-- `/application` (Aplicación - Casos de Uso): Coordina los procesos puros del negocio (ej. "Agendar un cita", "Cancelar una cita validando las reglas del negocio"). Usa las interfaces definidas en la capa de `domain` para recuperar y guardar la información.
+- `/application` (Aplicación - Casos de Uso): Coordina los procesos puros del negocio (ej. "Agendar un cita", "Cancelar una cita", "Completar una cita", "Consultar disponibilidad"). Usa las interfaces definidas en la capa de `domain` para recuperar y guardar la información.
 
 - `/infrastructure` (Infraestructura): Implementa las interfaces de los repositorios (definiendo el *cómo*).
   - Contiene los detalles técnicos (ej. `mysql2`).

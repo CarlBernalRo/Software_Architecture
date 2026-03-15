@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estructura Detallada de Arquitectura - Clínica Universitaria</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ 
+            startOnLoad: true, 
+            theme: 'base',
+            themeVariables: {
+                primaryColor: '#e1f5fe',
+                primaryTextColor: '#01579b',
+                primaryBorderColor: '#01579b',
+                lineColor: '#607d8b',
+                secondaryColor: '#f3e5f5',
+                tertiaryColor: '#fff3e0'
+            }
+        });
+    </script>
+    <style>
+        :root {
+            --presentation: #01579b;
+            --application: #4a148c;
+            --domain: #e65100;
+            --infrastructure: #1b5e20;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background-color: #f8f9fa;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+        h1 { color: #2c3e50; font-weight: 700; }
+        .diagram-container {
+            background: white;
+            padding: 40px 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            margin-bottom: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .mermaid {
+            width: 100% !important;
+            display: flex;
+            justify-content: center;
+        }
+        .layer-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 25px;
+        }
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 5px solid #ccc;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        }
+        .card.presentation { border-left-color: var(--presentation); }
+        .card.application { border-left-color: var(--application); }
+        .card.domain { border-left-color: var(--domain); }
+        .card.infrastructure { border-left-color: var(--infrastructure); }
+        
+        .card h2 { margin-top: 0; font-size: 1.25rem; display: flex; align-items: center; gap: 10px; }
+        .presentation h2 { color: var(--presentation); }
+        .application h2 { color: var(--application); }
+        .domain h2 { color: var(--domain); }
+        .infrastructure h2 { color: var(--infrastructure); }
+
+        ul { padding-left: 20px; }
+        li { margin-bottom: 8px; }
+        
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-right: 5px;
+            background: #eee;
+        }
+        footer {
+            margin-top: 60px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Estructura Detallada de la Clínica</h1>
+    <p>Análisis de flujo y responsabilidades bajo Arquitectura en Capas</p>
+</header>
+
+<div class="diagram-container">
+    <pre class="mermaid">
+    graph TD
+        subgraph CLINICA ["ESTRUCTURA DEL SISTEMA"]
+            direction TB
+
+            %% Capas
+            P["💻 PRESENTACIÓN<br/>(Express / React Components)"] 
+            A["⚙️ APLICACIÓN<br/>(Casos de Uso / Orquestación)"]
+            D["🧠 DOMINIO<br/>(Entidades y Contratos)"]
+            I["💾 INFRAESTRUCTURA<br/>(MySQL / API Adapters)"]
+
+            %% Flujos
+            USER((Usuario)) -->|Interactúa| P
+            P -->|Envía DTO / Request| A
+            A -->|Valida Reglas| D
+            A -->|Persiste / Recupera| I
+            I -.->|Inyecta Interfaz| D
+
+            %% Detalles internos
+            subgraph D_Inner ["Reglas de Negocio"]
+                D1[Citas No Pasadas]
+                D2[No Doble Cita]
+            end
+            D --- D_Inner
+        end
+
+        %% Estilos de Mermaid
+        style P fill:#e3f2fd,stroke:#01579b,stroke-width:2px
+        style A fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+        style D fill:#fff3e0,stroke:#e65100,stroke-width:2px
+        style I fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px
+    </pre>
+</div>
+
+<div class="layer-details">
+    <div class="card presentation">
+        <h2>💻 Capa de Presentación</h2>
+        <p>Es la "frontera" del sistema. Su única preocupación es la interacción con el mundo exterior.</p>
+        <ul>
+            <li><strong>Frontend:</strong> Vistas en React, manejo de rutas con <code>react-router-dom</code>.</li>
+            <li><strong>Backend API:</strong> Controladores Express que capturan el <code>req.body</code>.</li>
+            <li><strong>Validación:</strong> Usa <code>Zod</code> para asegurar que los datos tengan el formato correcto antes de entrar a la lógica.</li>
+        </ul>
+    </div>
+
+    <div class="card application">
+        <h2>⚙️ Capa de Aplicación</h2>
+        <p>Aquí se define <strong>qué</strong> hace el sistema. Orquesta los procesos sin conocer los detalles técnicos.</p>
+        <ul>
+            <li><strong>Casos de Uso:</strong> Clases como <code>AgendarCitaUseCase</code>.</li>
+            <li><strong>Orquestación:</strong> Coordina que el médico exista, que el paciente sea válido y que el horario se guarde.</li>
+            <li><strong>Independencia:</strong> No sabe si los datos vienen de una web o de una app móvil.</li>
+        </ul>
+    </div>
+
+    <div class="card domain">
+        <h2>🧠 Capa de Dominio</h2>
+        <p>El corazón del negocio. Contiene las reglas que existirían incluso si no hubiera computadoras.</p>
+        <ul>
+            <li><strong>Entidades:</strong> Modelos con lógica propia (ej. <code>Cita.cancelar()</code>).</li>
+            <li><strong>Invariantes:</strong> Un médico no puede ocupar dos espacios al mismo tiempo.</li>
+            <li><strong>Contratos:</strong> Interfaces que obligan a la infraestructura a cumplir ciertos métodos.</li>
+        </ul>
+    </div>
+
+    <div class="card infrastructure">
+        <h2>💾 Capa de Infraestructura</h2>
+        <p>Los detalles técnicos y herramientas externas que el sistema necesita para funcionar.</p>
+        <ul>
+            <li><strong>Persistencia:</strong> Implementaciones de SQL para MySQL usando <code>mysql2</code>.</li>
+            <li><strong>Seguridad:</strong> Configuración de <code>CORS</code> y variables de entorno <code>dotenv</code>.</li>
+            <li><strong>Consumo API:</strong> Clientes HTTP para conectar el Frontend con el Backend.</li>
+        </ul>
+    </div>
+</div>
+
+<footer>
+    <p>Proyecto Clínica Universitaria &copy; 2026 - Generado para soporte académico ACA</p>
+</footer>
+
+</body>
+</html>

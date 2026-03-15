@@ -50,11 +50,25 @@ export const useCitas = () => {
         }
     };
 
-    const reprogramarCita = async (id: number, nuevaFechaHora: string) => {
+    const completarCita = async (id: number) => {
         setLoading(true);
         setError(null);
         try {
-            const updatedCita = await CitaRepository.reprogramar(id, nuevaFechaHora);
+            await CitaRepository.completar(id);
+            setCitas((prev) => prev.map(c => c.id === id ? { ...c, estado: "COMPLETADA" } : c));
+        } catch (err: any) {
+            setError(err.message);
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const reprogramarCita = async (id: number, nuevaFechaHora: string, nuevoMedicoId?: number) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const updatedCita = await CitaRepository.reprogramar(id, nuevaFechaHora, nuevoMedicoId);
             setCitas((prev) => prev.map(c => c.id === id ? updatedCita : c));
             return updatedCita;
         } catch (err: any) {
@@ -88,6 +102,7 @@ export const useCitas = () => {
         fetchCitas,
         agendarCita,
         cancelarCita,
+        completarCita,
         reprogramarCita,
         consultarDisponibilidad
     };

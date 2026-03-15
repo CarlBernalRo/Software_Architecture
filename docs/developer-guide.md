@@ -19,6 +19,7 @@ El proyecto usa MySQL relacional.
 2. Conéctate a tu servidor local de MySQL (usualmente `localhost`, puerto `3306`, usuario `root`, contraseña vacía o la que hayas configurado).
 3. Entorno o Interfaz Gráfica: Ejecuta el script SQL estructurado ubicado en la raíz del proyecto.
    - Archivo: `database.sql`
+   - Script SQL: Depende de dónde tengas alojado MySQL, por ejemplo: /f/Programas/Xampp/mysql/bin/mysql -u root < database.sql
    - Esto creará la base de datos `clinica_db` junto con la estructura de tablas para `medicos`, `pacientes` y `citas`.
 
 ---

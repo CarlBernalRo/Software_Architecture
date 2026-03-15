@@ -6,7 +6,7 @@ export interface Cita {
     pacienteId: number;
     medicoId: number;
     fechaHora: string; // ISO string 
-    estado: "PROGRAMADA" | "CANCELADA" | "COMPLETADA";
+    estado: "ACTIVA" | "CANCELADA" | "COMPLETADA";
     created_at?: Date;
     updated_at?: Date;
     // Optional relations
